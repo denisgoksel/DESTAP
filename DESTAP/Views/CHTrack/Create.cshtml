@@ -1,0 +1,261 @@
+﻿@model DESTAP.Models.ChangeTrackModel
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Değişiklik Faaliyetleri Yeni Kayıt";
+    var todayDate = DateTime.Now.ToString("yyyy-MM-dd");
+}
+<!--<input asp-for="UserID" class="form-control" value="User.FindFirst(ClaimTypes.NameIdentifier).Value" readonly />-->
+
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5>Değişiklik Kontrol Yeni Kayıt</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" enctype="multipart/form-data" method="post">
+                        <div class="form-row mb-3">
+                            <label asp-for="UserID" class="col-md-4 col-form-label text-md-right">User ID</label>
+                            <div class="col-md-8">
+                                <input asp-for="UserID" class="form-control" value="@User.FindFirst(ClaimTypes.NameIdentifier).Value" readonly />
+                                <span asp-validation-for="UserID" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="CreatedYear" class="col-md-4 col-form-label text-md-right">YIL</label>
+                            <div class="col-md-8">
+                                <input asp-for="CreatedYear" class="form-control" type="number" />
+                                <span asp-validation-for="CreatedYear" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="ChangeNo" class="col-md-4 col-form-label text-md-right">DEĞİŞİKLİK NO</label>
+                            <div class="col-md-8">
+                                <input asp-for="ChangeNo" class="form-control" />
+                                <span asp-validation-for="ChangeNo" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="ChangeOpenDate" class="col-md-4 col-form-label text-md-right">DEĞİŞİKLİK AÇILIŞ TARİHİ</label>
+                            <div class="col-md-8">
+                                <input asp-for="ChangeOpenDate" class="form-control" type="date" min="@todayDate" />
+                                <span asp-validation-for="ChangeOpenDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="ChangeDescription" class="col-md-4 col-form-label text-md-right">DEĞİŞİKLİĞİN TANIMI</label>
+                            <div class="col-md-8">
+                                <textarea asp-for="ChangeDescription" class="form-control"></textarea>
+                                <span asp-validation-for="ChangeDescription" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="ActionNo" class="col-md-4 col-form-label text-md-right">AKSİYON NO</label>
+                            <div class="col-md-8">
+                                <input asp-for="ActionNo" class="form-control" />
+                                <span asp-validation-for="ActionNo" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="ActionDescription" class="col-md-4 col-form-label text-md-right">AKSİYON TANIMI</label>
+                            <div class="col-md-8">
+                                <textarea asp-for="ActionDescription" class="form-control"></textarea>
+                                <span asp-validation-for="ActionDescription" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="RSP_Department" class="col-md-4 col-form-label text-md-right">SORUMLU DEPARTMAN</label>
+                            <div class="col-md-8">
+                                <select asp-for="RSP_Department" class="form-control" asp-items="ViewBag.Departments" onchange="updateRSPUser()">
+                                    <option value="">Bölüm Seçiniz...</option>
+                                </select>
+                                <span asp-validation-for="RSP_Department" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- RSP User seçimi -->
+                        <div class="form-row mb-3">
+                            <label asp-for="RSP_User" class="col-md-4 col-form-label text-md-right">SORUMLU KİŞİ</label>
+                            <div class="col-md-8">
+                                <select asp-for="RSP_User" class="form-control" id="RSP_User">
+                                    <option value="">Kişi Seçiniz...</option>
+                                </select>
+                                <span asp-validation-for="RSP_User" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <label class="col-md-4 col-form-label text-md-right">Diğer Sorumlu Kişiler</label>
+                            <div class="col-md-8">
+                                <input id="Other_RSPs_MG" name="Other_RSPs_MG" class="form-control" />
+                                <input type="hidden" id="Other_RSPs" name="Other_RSPs" />
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <label asp-for="State" class="col-md-4 col-form-label text-md-right">DURUMU</label>
+                            <div class="col-md-8">
+                                <input asp-for="State" class="form-control" />
+                                <span asp-validation-for="State" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="TargetDate1" class="col-md-4 col-form-label text-md-right">HEDEF TARİH 1</label>
+                            <div class="col-md-8">
+                                <input asp-for="TargetDate1" class="form-control" type="date" min="@todayDate" />
+                                <span asp-validation-for="TargetDate1" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="TargetDate2" class="col-md-4 col-form-label text-md-right">HEDEF TARİH 2</label>
+                            <div class="col-md-8">
+                                <input asp-for="TargetDate2" class="form-control" type="date" min="@todayDate" />
+                                <span asp-validation-for="TargetDate2" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row mb-3">
+                            <label asp-for="TargetDate3" class="col-md-4 col-form-label text-md-right">HEDEF TARİH 3</label>
+                            <div class="col-md-8">
+                                <input asp-for="TargetDate3" class="form-control" type="date" min="@todayDate" />
+                                <span asp-validation-for="TargetDate3" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!--
+                            <div class="form-row mb-3">
+                                <label asp-for="CompleteDate" class="col-md-4 col-form-label text-md-right">TAMAMLANMA TARİHİ</label>
+                                <div class="col-md-8">
+                                    <input asp-for="CompleteDate" class="form-control" type="date" min="@todayDate" />
+                                    <span asp-validation-for="CompleteDate" class="text-danger"></span>
+                                </div>
+                            </div>
+                         -->
+                        <div class="form-row mb-3">
+                            <label asp-for="Description" class="col-md-4 col-form-label text-md-right">TAMAMLANMA TARİHİ</label>
+                            <div class="col-md-8">
+                                <textarea asp-for="Description" class="form-control"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <label for="fileUpload" class="col-md-4 col-form-label text-md-right">Dosya Yükle</label>
+                            <div class="col-md-8">
+                                <input type="file" id="fileUploads" name="fileUploads" class="form-control" multiple />
+                            </div>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary">Kaydet</button>
+                            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="~/lib/magicsuggest/magicsuggest.css" rel="stylesheet">
+
+}
+@section Scripts {
+    <script src="~/lib/magicsuggest/magicsuggest.js"></script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function updateRSPUser() {
+            var department = document.getElementById("RSP_Department").value;
+
+            if (department) {
+                // Departman seçildiğinde kullanıcıları güncellemek için API çağrısı
+                $.ajax({
+                    url: '@Url.Action("GetUsersByDepartment", "Common")',
+                    type: 'POST',
+                    data: { department: department },
+                    success: function(response) {
+                        if (response.success) {
+                            var userSelect = $('#RSP_User');
+                            userSelect.empty(); // Var olan seçenekleri temizle
+                            userSelect.append('<option value="">Kişi Seçiniz...</option>');
+
+                            // Kullanıcıları dropdown'a ekle
+                            response.users.forEach(function(user) {
+                                userSelect.append('<option value="' + user.id + '">' + user.nameSurname + '</option>');
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            } else {
+                // Eğer departman boşsa kullanıcıları temizle
+                $('#RSP_User').empty();
+                $('#RSP_User').append('<option value="">Kişi Seçiniz...</option>');
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Fetch the user list for MagicSuggest
+            $.ajax({
+                url: '/Common/GetUsers',
+                type: 'GET',
+                success: function (response) {
+                    // Ensure response structure is as expected
+                    if (response.success) {
+                        // Map the user data into MagicSuggest's expected format
+                        var userList = response.users.map(user => ({
+                            id: user.id,
+                            name: user.nameSurname
+                        }));
+
+                        // Initialize MagicSuggest and store the instance in a variable
+                        var otherRSPs = $('#Other_RSPs_MG').magicSuggest({
+                            data: userList,          // User list as suggestions
+                            valueField: 'id',        // Field used for value
+                            displayField: 'name',    // Field displayed in the dropdown
+                            placeholder: 'Diğer Sorumluları Seçin...',
+                            maxSelection: 5,         // Limit the number of selected items
+                            allowFreeEntries: false, // Disable manual entry
+                            highlight: true,         // Highlight matching suggestions
+                            selectionPosition: 'inner', // Position for selected items
+                            required: true           // Ensure the field is required
+                        });
+
+                        // Attach form submit event to update "Other_RSPs_MG" input value before form submission
+                        $('form').on('submit', function (event) {
+                            // Get selected user IDs and join them with commas
+                            var selectedValues = otherRSPs.getValue();
+
+                            // Log the selected values for debugging
+                            console.log("Selected Values before submit:", selectedValues);
+
+                            // Ensure there are multiple values, then join them with commas
+                            if (selectedValues.length > 0) {
+                                var selectedValuesString = selectedValues.join(', ');
+
+                                $('#Other_RSPs').val(selectedValuesString); // Set the value to input
+                            }
+                        });
+                    } else {
+                        alert(response.message || "Error fetching user list.");
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while retrieving the user list.");
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Admin";
+}
+
+<div class="container-fluid mt-4">
+    <div class="text-center mb-4">
+        <h2>İşlem Seçimi</h2>
+        <p class="text-muted">Yapmak istediğiniz işlemi seçiniz.</p>
+    </div>
+    <div class="row justify-content-center">
+        <!-- DÖF Girişi Kartı -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">DÖF Girişi</h5>
+                    <p class="card-text">Düzeltici Önleyici Faaliyet girişini buradan yapabilirsiniz.</p>
+                    <a href="/CPTrack/Index" class="btn btn-primary">Giriş Yap</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- DK Girişi Kartı -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">DK Girişi</h5>
+                    <p class="card-text">Dokümantasyon Kontrol girişini buradan yapabilirsiniz.</p>
+                    <a href="/CHTrack/Index" class="btn btn-primary">Giriş Yap</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sapma Girişi Kartı -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Sapma Girişi</h5>
+                    <p class="card-text">Sapma kayıtlarını buradan gerçekleştirin.</p>
+                    <a href="/DVTrack/Index" class="btn btn-primary">Giriş Yap</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+            // Eğer özel bir interaktiflik eklemek isterseniz buraya JavaScript kodu ekleyebilirsiniz.
+    </script>
+}

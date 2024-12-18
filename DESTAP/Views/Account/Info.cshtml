@@ -1,0 +1,124 @@
+﻿@model DESTAP.Models.UserModel
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header text-center">
+            <h3>Kullanıcı Bilgileri</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td class="font-weight-bold text-right" style="width: 30%;">ID:</td>
+                        <td>@Model.ID</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Ad Soyad:</td>
+                        <td>@Model.NameSurname</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">E-posta:</td>
+                        <td>@Model.Mail</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Bölüm:</td>
+                        <td>@Model.Department</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Yönetici E-posta:</td>
+                        <td>@Model.ManagerMail</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Rol:</td>
+                        <td>@Model.RoleDetails?.RoleName</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Rol Açıklaması:</td>
+                        <td>@Model.RoleDetails?.RoleDescription</td>
+                    </tr>
+                    <tr>
+                        <td class="font-weight-bold text-right">Şifre:</td>
+                        <td>
+                            <button class="btn btn-warning" data-toggle="modal" data-target="#changePasswordModal">Şifreyi Değiştir</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Şifre Değiştirme Modalı -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" role="dialog" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Şifreyi Güncelle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+                    <input type="hidden" id="userId" value="@Model.ID" />
+                    <div class="form-group">
+                        <label for="oldPassword">Eski Şifre:</label>
+                        <input type="password" class="form-control" id="oldPassword" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Yeni Şifre:</label>
+                        <input type="password" class="form-control" id="newPassword" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Yeni Şifre (Tekrar):</label>
+                        <input type="password" class="form-control" id="confirmPassword" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="updatePassword()">Şifreyi Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updatePassword() {
+        var userId = $("#userId").val();
+        var oldPassword = $("#oldPassword").val();
+        var newPassword = $("#newPassword").val();
+        var confirmPassword = $("#confirmPassword").val();
+
+        if (!oldPassword || !newPassword || !confirmPassword) {
+            alert("Tüm alanları doldurun.");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            alert("Yeni şifreler eşleşmiyor.");
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("ChangePassword", "Account")',
+            type: 'POST',
+            data: {
+                id: userId,
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            },
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    $('#changePasswordModal').modal('hide');
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function () {
+                alert("Hata oluştu. Lütfen tekrar deneyin.");
+            }
+        });
+    }
+</script>

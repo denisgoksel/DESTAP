@@ -1,0 +1,611 @@
+﻿@model IEnumerable<DVTrackModel>
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Sapma Faaliyetleri Listesi";
+    var loggedInUserId = User.FindFirst(ClaimTypes.NameIdentifier).Value;
+}
+<style type="text/css">
+    .custom-button-row .col {
+        padding: 0 1px; /* Minimize spacing between buttons */
+    }
+
+    .custom-btn {
+        width: 100%; /* Make all buttons take up the full width of their columns */
+        font-size: 12px; /* Smaller font size */
+        padding: 4px 0; /* Reduced padding for compact button height */
+    }
+</style>
+<div class="container-fluid mt-5">
+    <h3>Sapma Faaliyetleri Listesi</h3>
+    <div class="text-right mb-3">
+        <a href="@Url.Action("Create", "DVTrack")" class="btn btn-primary btn-sm">Yeni Kayıt Ekle</a>
+    </div>
+    <div>
+        <div class="container-fluid" style="height: 100vh;">
+            <table id="dataTable1" class="table table-bordered table-hover table-responsive" style="height: 100%;font-size: 0.8rem;">
+                <thead class="sticky-header">
+                    <tr>
+
+                        <th>ID</th>
+                        <th>YIL</th>
+                        <th>SAPMA NO</th>
+                        <th>SAPMA AÇILIŞ TARİHİ</th>
+                        <th>SAPMANIN TANIMI</th>
+                        <th>AKSİYON NO</th>
+                        <th>AKSİYON TANIMI</th>
+                        <th>SORUMLU DEPARTMAN</th>
+                        <th>SORUMLU KİŞİ</th>
+                        <th>DURUMU</th>
+                        <th>HEDEF TARİH</th>
+
+                        <th>TAMAMLANMA TARİHİ</th>
+                        <th>AÇIKLAMA</th>
+                        <th>İŞLEMLER</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr class="clickable-row" data-toggle="collapse" data-target="#collapse-@item.ID" style="cursor: pointer;">
+                            <td class="clickable-cell">@item.ID</td>
+                            <td class="clickable-cell">@item.CreatedYear</td>
+                            <td class="clickable-cell">@item.DeviationNo</td>
+                            <td class="clickable-cell">@item.DeviationOpenDate?.ToString("dd.MM.yyyy")</td>
+                            <td class="clickable-cell"><div class="text-truncate" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">@item.DeviationDescription</div></td>
+                            <td class="clickable-cell">@item.ActionNo</td>
+                            <td class="clickable-cell">
+                                <div class="text-truncate" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                    @item.ActionDescription
+                                </div>
+                            </td>
+                            <td class="clickable-cell">@item.RSP_Department</td>
+
+                            <td class="clickable-cell">@item.ResponsibleUser.NameSurname </td>
+                            <td class="clickable-cell">@item.State</td>
+                            <td class="clickable-cell">@item.TargetDate?.ToString("dd.MM.yyyy HH:mm")</td>
+
+                            <td id="completionDate_@item.ID" class="clickable-cell">@item.CompleteDate?.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="clickable-cell">
+                                <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
+                                    @item.Description
+                                </div>
+                            </td>
+                            <td class="operations-column">
+
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    @if (User.FindFirst(ClaimTypes.Role).Value == "1")//Admin?
+                                    {
+                                        <div class="dropdown">
+                                            <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                İşlemler
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="actionMenuButton">
+                                                <a class="dropdown-item" href="@Url.Action("Edit", "DVTrack", new { id = item.ID })">Güncelle</a>
+                                                <a class="dropdown-item" href="#" onclick="confirmDelete('@item.ID', '@item.DeviationDescription')">Sil</a>
+                                                <a class="dropdown-item" href="#" onclick="sendEmail(@User.FindFirst(ClaimTypes.NameIdentifier).Value, @item.ID)">Mail At</a>
+                                                <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
+                                                <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
+                                                <a class="dropdown-item" href="#" onclick="showTargetDateModal(@item.ID)">Tarih Değişiklik Talebi</a>
+                                            </div>
+                                        </div>
+
+
+                                    }
+                                    else if (User.FindFirst(ClaimTypes.Role).Value == "2")//User?
+                                    {
+                                        <div class="dropdown">
+                                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                İşlemler
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="actionMenuButton">
+                                                @if (loggedInUserId == item.RSP_User.ToString())
+                                                {
+                                                    <div class="row custom-button-row">
+                                                        @if (item.CompleteDate == null || item.CompleteDate.ToString() == "")  // CompleteDate alanı boşsa göster
+                                                        {
+
+                                                            <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
+
+                                                        }
+
+                                                        <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
+                                                        <a class="dropdown-item" href="#" onclick="showTargetDateModal('@item.ID')">Tarih Değişiklik Talebi</a>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <a class="dropdown-item" href="#">Bu Kayıtta Yetkiniz Yok!</a>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+            @TempData["Hata"]
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Silme Onayı</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="deleteRecordDescription"></strong> kaydını silmek istediğinizden emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-danger" onclick="deleteRecord()">Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="feedbackModal" tabindex="-1" role="dialog" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabel">Geri Bildirim Gönder</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedbackDescription">Açıklama</label>
+                        <textarea class="form-control" id="feedbackDescription" name="feedbackDescription" rows="3" required></textarea>
+                    </div>
+                    <input type="hidden" id="UserID" name="UserID">
+                    <input type="hidden" id="RecordID" name="RecordID">
+                    <button type="submit" class="btn btn-primary">Gönder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tamamlama Modalı -->
+<div class="modal fade" id="completionModal" tabindex="-1" role="dialog" aria-labelledby="completionModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completionModalLabel">Tamamla</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="completionForm">
+                    <div class="form-group">
+                        <label for="completionDate">Tamamlama Tarihi</label>
+                        @{ var isAdmin = User.FindFirst(ClaimTypes.Role)?.Value == "1"; // Admin mi kontrol et
+                            var today = DateTime.Now.ToString("yyyy-MM-dd"); }
+                        <input type="date"
+                               class="form-control"
+                               id="completionDate"
+                               name="completionDate"
+                               value="@today"
+                               @(isAdmin ? "" : $"min='{today}' readonly")>
+                    </div>
+                    <div class="form-group">
+                        <label for="completionDescription">Açıklama</label>
+                        <textarea class="form-control" id="completionDescription" name="completionDescription" rows="3" required></textarea>
+                    </div>
+                    <input type="hidden" id="RecordID" name="RecordID">
+                    <button type="submit" class="btn btn-primary">Gönder</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="targetDateModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Hedef Tarihi Değişikliği Talebi</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="targetDateForm">
+                    <div class="form-group">
+                        <label for="requestedDate">Talep Edilen Tarih:</label>
+                        <input type="date" class="form-control" id="requestedDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="changeDescription">Açıklama:</label>
+                        <textarea class="form-control" id="changeDescription" rows="3" required></textarea>
+                    </div>
+                    <input type="hidden" id="RecordID" name="RecordID">
+                    <button type="submit" class="btn btn-primary">Gönder</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- recDetailModal -->
+ 
+<div class="modal fade" id="recDetailModal" tabindex="-1" aria-labelledby="recDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recDetailModalLabel">Kayıt Detayları</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm table-bordered" style="font-size: 12px;">
+                    <tbody>
+                        <tr>
+                            <td><strong>ID</strong></td>
+                            <td id="recID"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Yıl</strong></td>
+                            <td id="recYear"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sapma No</strong></td>
+                            <td id="recDeviationNo"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sapma Açılış Tarihi</strong></td>
+                            <td id="recDeviationOpenDate"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sapmanın Tanımı</strong></td>
+                            <td id="recDeviationDescription"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aksiyon No</strong></td>
+                            <td id="recActionNo"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Aksiyon Tanımı</strong></td>
+                            <td id="recActionDescription"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sorumlu Departman</strong></td>
+                            <td id="recRSPDepartment"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sorumlu Kişi</strong></td>
+                            <td id="recResponsibleUser"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Durum</strong></td>
+                            <td id="recState"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hedef Tarih</strong></td>
+                            <td id="recTargetDate"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tamamlanma Tarihi</strong></td>
+                            <td id="recCompleteDate"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Açıklama</strong></td>
+                            <td id="recDescription"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        /* Eşit boyutlu butonlar için stil */
+        .action-btn {
+            min-width: 50px; /* Butonların aynı genişlikte görünmesi için minimum genişlik */
+            height: 35px; /* Sabit yükseklik */
+            white-space: nowrap; /* Yazının tek satırda kalması */
+            font-size: 0.75rem; /* Font boyutu */
+            margin-left: 3px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $('#dataTable1').DataTable({
+                "language": {
+                    "url": "/lib/datatables/Turkish.json" // Türkçe dil dosyasını ekleyin
+                },
+                "paging": true,              // Sayfalama aktif
+                "searching": true,           // Arama kutusu aktif
+                "ordering": true,            // Sıralama aktif
+                "info": true,                // Sayfa bilgisi aktif
+                "responsive": true,          // Mobil uyumlu
+                "pageLength": 10,            // Sayfa başına 10 kayıt
+                "lengthChange": false,       // Kullanıcıların sayfa başına gösterilen kayıt sayısını değiştirmesini engelle
+                "order": [[0, 'desc']]       // ID sütunu (ilk sütun) büyükten küçüğe sıralanacak
+            });
+        });
+    </script>
+  
+    <script>
+        $(document).ready(function () {
+            // Tıklanabilir hücrelere tıklama olayı
+            $('.clickable-cell').on('click', function (e) {
+
+                // "İşlemler" sütununda ise, hiçbir şey yapma
+                if ($(e.target).closest('.operations-column').length) {
+                    return; // İşlemler butonuna tıklanırsa hiçbir şey yapma
+                }
+
+                var recID = $(this).closest('tr').find('td:eq(0)').text(); // ID (1. sütun)
+                var recYear = $(this).closest('tr').find('td:eq(1)').text(); // Yıl (2. sütun)
+                var recCPANo = $(this).closest('tr').find('td:eq(2)').text(); // DÖF No (3. sütun)
+                var recCPAOpenDate = $(this).closest('tr').find('td:eq(3)').text(); // DÖF Açılış Tarihi (4. sütun)
+                var recCPADescription = $(this).closest('tr').find('td:eq(4)').text(); // DÖF Tanımı (5. sütun)
+                var recActionNo = $(this).closest('tr').find('td:eq(5)').text(); // Aksiyon No (6. sütun)
+                var recActionDescription = $(this).closest('tr').find('td:eq(6)').text(); // Aksiyon Tanımı (7. sütun)
+                var recDepartment = $(this).closest('tr').find('td:eq(7)').text(); // Sorumlu Departman (8. sütun)
+                var recResponsibleUser = $(this).closest('tr').find('td:eq(8)').text(); // Sorumlu Kişi (9. sütun)
+                var recState = $(this).closest('tr').find('td:eq(9)').text(); // Durumu (10. sütun)
+                var recTargetDate = $(this).closest('tr').find('td:eq(10)').text(); // Hedef Tarih (11. sütun)
+                var recCompleteDate = $(this).closest('tr').find('td:eq(11)').text(); // Tamamlanma Tarihi (12. sütun)
+                var recDescription = $(this).closest('tr').find('td:eq(12)').text(); // Açıklama (13. sütun)
+
+                // Modal içindeki alanları güncelle
+                $('#recID').text(recID);
+                $('#recYear').text(recYear);
+                $('#recCPANo').text(recCPANo);
+                $('#recCPAOpenDate').text(recCPAOpenDate);
+                $('#recCPADescription').text(recCPADescription);
+                $('#recActionNo').text(recActionNo);
+                $('#recActionDescription').text(recActionDescription);
+                $('#recDepartment').text(recDepartment);
+                $('#recResponsibleUser').text(recResponsibleUser);
+                $('#recState').text(recState);
+                $('#recTargetDate').text(recTargetDate);
+                $('#recCompleteDate').text(recCompleteDate);
+                $('#recDescription').text(recDescription);
+
+                // Modal'ı göster
+                $('#recDetailModal').modal('show');
+            });
+        });
+
+
+    </script>
+    <script>
+        var recordIdToDelete = null;
+
+        // Silme işlemi için modalı aç ve kayıt bilgilerini göster
+        function confirmDelete(id, description) {
+            recordIdToDelete = id;
+            document.getElementById("deleteRecordDescription").innerText = description;
+            $('#deleteConfirmModal').modal('show');
+        }
+
+        // Silme işlemini onayla ve sunucuya isteği gönder
+        function deleteRecord() {
+            if (recordIdToDelete) {
+                $.ajax({
+                    url: '@Url.Action("DeleteConfirmed", "DVTrack")',
+                    type: 'POST',
+                    data: { id: recordIdToDelete },
+                    success: function (response) {
+                        $('#deleteConfirmModal').modal('hide');
+                        location.reload(); // Sayfayı yenileyerek listeyi güncelle
+                    },
+                    error: function () {
+                        alert("Silme işlemi başarısız oldu.");
+                    }
+                });
+            }
+        }
+    </script>
+    <script>
+            // Function to send email
+            function sendEmail(userId, recordId) {
+                // Making an AJAX call to the controller action
+                $.ajax({
+                    url: '@Url.Action("SendEmail", "DVTrack")', // Controller and action URL
+                    type: 'POST',
+                    data: {
+                        userId: userId,
+                        recordId: recordId,
+                        subject: "TEST Sapma Bilgilendirme"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            alert("E-posta başarıyla gönderildi.");
+                        } else {
+                            alert("Hata oluştu: " + response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Bir hata oluştu: " + error);
+                    }
+                });
+            }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var maxRowHeight = $(window).height() * 0.1;
+            var rowHeightLimit = maxRowHeight - 10;
+
+            // Satır yüksekliğini sınırlama
+            $('.table tbody tr').each(function () {
+                var rowHeight = $(this).height();
+                if (rowHeight > rowHeightLimit) {
+                    $(this).css('max-height', rowHeightLimit + 'px');
+                    $(this).css('overflow', 'hidden');
+                }
+            });
+
+            // Toggle işlemini işlemler sütunundan hariç tutma
+            $('.clickable-row').on('click', function (e) {
+                // Tıklanan hücrenin işlemler sütunu olup olmadığını kontrol et
+                if ($(e.target).closest('.operations-column').length === 0) {
+                    // İşlemler sütunu değilse toggle işlemini yap
+                    var id = $(this).data('target').split('-')[1];
+                    $('#collapse-change-description-' + id).collapse('toggle');
+                    $('#collapse-action-description-' + id).collapse('toggle');
+                }
+            });
+        });
+    </script>
+
+    <script>
+        function sendFeedBack(UserID, RecordID) {
+    // Modal'daki gizli alanlara UserID ve RecordID değerlerini ata
+    document.getElementById('UserID').value = UserID;
+    document.getElementById('RecordID').value = RecordID;
+
+    // Modal'ı göster
+    $('#feedbackModal').modal('show');
+}
+
+// Form gönderme işlemi
+$(document).ready(function () {
+    $('#feedbackForm').submit(function (e) {
+        e.preventDefault(); // Sayfanın yenilenmesini engelle
+
+        var formData = {
+            UserID: $('#UserID').val(),
+            RecordID: $('#RecordID').val(),
+            FeedbackDescription: $('#feedbackDescription').val()
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("SendFeedback", "DVTrack")', // Controller ve Action adını ayarlayın
+            data: formData,
+            success: function (response) {
+                if (response.success) {
+                    alert("Geri bildirim başarıyla gönderildi.");
+                    $('#feedbackModal').modal('hide'); // Modal'ı gizle
+                } else {
+                    alert("Geri bildirim gönderilirken hata oluştu.");
+                }
+            },
+            error: function () {
+                alert("Geri bildirim gönderilirken bir hata oluştu.");
+            }
+        });
+    });
+});
+
+    </script>
+
+    <!--Tamamlama modülü-->
+    <script>
+        function showCompletionModal(recordID) {
+            var completionDateElement = document.getElementById('completionDate_' + recordID);
+
+            // Elementin varlığını kontrol et
+            if (!completionDateElement) {
+                console.error('completionDate_' + recordID + ' bulunamadı.');
+                return;
+            }
+
+            var cpDate = completionDateElement.textContent.trim(); // İçeriği al ve boşlukları temizle
+
+            if (cpDate) {
+                alert("Bu kayıt tamamlanmıştır!");
+                $('#completionModal').modal('hide'); // Modal kapat
+            } else {
+                $('#completionModal').modal('show'); // Modal göster
+            }
+        }
+
+$(document).ready(function () {
+    $('#completionForm').submit(function (e) {
+        e.preventDefault(); // Sayfanın yenilenmesini engelle
+
+        var formData = {
+            RecordID: $('#RecordID').val(),
+            CompletionDate: $('#completionDate').val(),
+            CompletionDescription: $('#completionDescription').val()
+        };
+
+         $.ajax({
+                type: 'POST',
+                url: '@Url.Action("CompleteRecord", "DVTrack")',
+                data: formData,
+                success: function (response) {
+                    if (response.success) {
+                        alert("Tamamlama işlemi başarıyla kaydedildi. Tamamlama Tarihi: " + response.completionDate);
+                        $('#completionModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert("Tamamlama işlemi sırasında bir hata oluştu: " + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Tamamlama işlemi sırasında bir hata oluştu: " + error);
+                }
+            });
+    });
+});
+    </script>
+    <script>
+        // Modal'ı açan fonksiyon
+        function showTargetDateModal(recordID) {
+            document.getElementById('RecordID').value = recordID;
+            $('#targetDateModal').modal('show');
+        };
+
+        // Hedef tarihi değişikliği talebini gönderme fonksiyonu
+        $(document).ready(function () {
+            $('#targetDateForm').submit(function (e) {
+                e.preventDefault();  // Formun varsayılan submit davranışını engelle
+
+                var requestedDate = $('#requestedDate').val();
+                var changeDescription = $('#changeDescription').val();
+
+                if (requestedDate && changeDescription) {
+                    // AJAX ile formu gönderme
+                    $.ajax({
+                        type: "POST",
+                        url: "/DVTrack/SubmitTargetDateChange",  // Controller'daki action
+                        data: {
+                            requestedDate: requestedDate,
+                            changeDescription: changeDescription,
+                            recordId: $('#RecordID').val() // Eğer modelde RecordID varsa
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                alert('Hedef tarihi değişikliği talebiniz başarıyla gönderildi.');
+                                $('#targetDateModal').modal('hide');
+                                location.reload(); // Sayfayı yenileyin
+                            } else {
+                                alert('Bir hata oluştu.');
+                            }
+                        },
+                        error: function () {
+                            alert('Bir hata oluştu.');
+                        }
+                    });
+                } else {
+                    alert('Tüm alanları doldurduğunuzdan emin olun.');
+                }
+            });
+        });
+    </script>
+
+}

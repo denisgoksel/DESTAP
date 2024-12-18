@@ -1,0 +1,113 @@
+﻿@model IEnumerable<ChangeTrackModel>
+
+@{
+    ViewData["Title"] = "Change Track Records";
+}
+
+<!-- container-fluid kullanarak tam genişlik sağlıyoruz -->
+<div class="container-fluid mt-5">
+    <h3>Değişiklik Kontrol Listesi</h3>
+
+    <div class="text-right mb-3">
+        <a href="@Url.Action("Create", "ChangeTrack")" class="btn btn-primary">Yeni Kayıt Ekle</a>
+    </div>
+
+    <!-- Tabloyu tamamen ekrana sığacak şekilde düzenliyoruz -->
+    <div>
+        <table class="table table-bordered table-hover" style="font-size: 0.9rem;">
+            <thead class="sticky-header">
+                <tr>
+                    <th>ID</th>
+                    <th>YIL</th>
+                    <th>DEĞİŞİKLİK NO</th>
+                    <th>DEĞİŞİKLİK AÇILIŞ TARİHİ</th>
+                    <th>DEĞİŞİKLİĞİN TANIMI</th>
+                    <th>AKSİYON NO</th>
+                    <th>AKSİYON TANIMI</th>
+                    <th>SORUMLU DEPARTMAN</th>
+                    <th>SORUMLU KİŞİ</th>
+                    <th>DURUMU</th>
+                    <th>HEDEF TARİH 1</th>
+                    <th>HEDEF TARİH 2</th>
+                    <th>HEDEF TARİH 3</th>
+                    <th>TAMAMLANMA TARİHİ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="clickable-row" data-toggle="collapse" data-target="#collapse-@item.ID" style="cursor: pointer;">
+                        <td>@item.ID</td>
+                        <td>@item.CreatedYear</td>
+                        <td>@item.ChangeNo</td>
+                        <td>@item.ChangeOpenDate?.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                @item.ChangeDescription
+                            </div>
+                        </td>
+                        <td>@item.ActionNo</td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                @item.ActionDescription
+                            </div>
+                        </td>
+                        <td>@item.RSP_Department</td>
+                        <td>@item.RSP_User</td>
+                        <td>@item.State</td>
+                        <td>@item.TargetDate1?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@item.TargetDate2?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@item.TargetDate3?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@item.CompleteDate?.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+
+                    <!-- ChangeDescription için açılır satır -->
+                    <tr id="collapse-change-description-@item.ID" class="collapse">
+                        <td colspan="8">
+                            <div class="expanded-row">
+                                <strong>Change Description:</strong>
+                                <p>@item.ChangeDescription</p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- ActionDescription için açılır satır -->
+                    <tr id="collapse-action-description-@item.ID" class="collapse">
+                        <td colspan="8">
+                            <div class="expanded-row">
+                                <strong>Action Description:</strong>
+                                <p>@item.ActionDescription</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Satırların yüksekliğini sınırlamak için
+            var maxRowHeight = $(window).height() * 0.1; // Ekranın %10'u
+            var rowHeightLimit = maxRowHeight - 10; // Biraz padding ekleyelim
+
+            // Tablo satırlarının yüksekliğini kontrol et ve sınırlama yap
+            $('.table tbody tr').each(function () {
+                var rowHeight = $(this).height();
+                if (rowHeight > rowHeightLimit) {
+                    $(this).css('max-height', rowHeightLimit + 'px');
+                    $(this).css('overflow', 'hidden'); // İçeriği gizleyelim
+                }
+            });
+
+            // Tıklanabilir satır işlevi
+            $('.clickable-row').on('click', function () {
+                var id = $(this).data('target').split('-')[1]; // Target ID'yi alıyoruz
+                $('#collapse-change-description-' + id).collapse('toggle'); // ChangeDescription için toggle
+                $('#collapse-action-description-' + id).collapse('toggle'); // ActionDescription için toggle
+            });
+        });
+    </script>
+}

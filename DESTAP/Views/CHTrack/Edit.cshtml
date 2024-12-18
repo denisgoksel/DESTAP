@@ -1,0 +1,234 @@
+﻿@model DESTAP.Models.ChangeTrackModel
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = "Değişiklik Kayıt Güncelleme";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+
+    <form asp-action="Edit" method="post" class="form-horizontal">
+
+        <input name="UserID" class="form-control" type="hidden" value="@User.FindFirst(ClaimTypes.NameIdentifier).Value" />
+
+        <div class="form-group row">
+            <label asp-for="CreatedYear" class="col-sm-2 col-form-label">Yıl</label>
+            <div class="col-sm-10">
+                <input asp-for="CreatedYear" class="form-control" />
+                <span asp-validation-for="CreatedYear" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ChangeNo" class="col-sm-2 col-form-label">Değişiklik No</label>
+            <div class="col-sm-10">
+                <input asp-for="ChangeNo" class="form-control" />
+                <span asp-validation-for="ChangeNo" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ChangeOpenDate" class="col-sm-2 col-form-label">Değişiklik Açılış Tarihi</label>
+            <div class="col-sm-10">
+                <input asp-for="ChangeOpenDate" class="form-control" type="date" />
+                <span asp-validation-for="ChangeOpenDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ChangeDescription" class="col-sm-2 col-form-label">Değişiklik Tanımı</label>
+            <div class="col-sm-10">
+                <textarea asp-for="ChangeDescription" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ChangeDescription" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ActionNo" class="col-sm-2 col-form-label">Aksiyon No</label>
+            <div class="col-sm-10">
+                <input asp-for="ActionNo" class="form-control" />
+                <span asp-validation-for="ActionNo" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="ActionDescription" class="col-sm-2 col-form-label">Aksiyon Tanımı</label>
+            <div class="col-sm-10">
+                <textarea asp-for="ActionDescription" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ActionDescription" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label asp-for="RSP_Department" class="col-sm-2 col-form-label">Sorumlu Departman</label>
+            <div class="col-sm-10">
+                <select asp-for="RSP_Department" class="form-control" asp-items="ViewBag.Departments" onchange="updateRSPUser()">
+                    <option value="">Bölüm Seçiniz...</option>
+                </select>
+                <span asp-validation-for="RSP_Department" class="text-danger"></span>
+            </div>
+        </div>
+        <!-- RSP User seçimi -->
+        <div class="form-group row">
+            <label asp-for="RSP_User" class="col-sm-2 col-form-label">Sorumlu Kişi</label>
+            <div class="col-sm-10">
+                <select asp-for="RSP_User" class="form-control" id="RSP_User" asp-items="ViewBag.SavedUser">
+                    <option value="@Model.RSP_User" selected>@ViewBag.DefaultUser</option>
+                </select>
+                <span asp-validation-for="RSP_User" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-sm-2 col-form-label">Diğer Sorumlu Kişiler</label>
+            <div class="col-sm-10">
+                <input id="Other_RSPs_MG" name="Other_RSPs_MG" class="form-control" />
+                <input type="hidden" id="Other_RSPs" name="Other_RSPs" />
+            </div>
+        </div>
+
+
+
+        <div class="form-group row">
+            <label asp-for="State" class="col-sm-2 col-form-label">Durumu</label>
+            <div class="col-sm-10">
+                <input asp-for="State" class="form-control" />
+                <span asp-validation-for="State" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="TargetDate1" class="col-sm-2 col-form-label">Hedef Tarih 1</label>
+            <div class="col-sm-10">
+                <input asp-for="TargetDate1" class="form-control" type="date" />
+                <span asp-validation-for="TargetDate1" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="TargetDate2" class="col-sm-2 col-form-label">Hedef Tarih 2</label>
+            <div class="col-sm-10">
+                <input asp-for="TargetDate2" class="form-control" type="date" />
+                <span asp-validation-for="TargetDate2" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="TargetDate3" class="col-sm-2 col-form-label">Hedef Tarih 3</label>
+            <div class="col-sm-10">
+                <input asp-for="TargetDate3" class="form-control" type="date" />
+                <span asp-validation-for="TargetDate3" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label asp-for="CompleteDate" class="col-sm-2 col-form-label">Tamamlanma Tarihi</label>
+            <div class="col-sm-10">
+                <input asp-for="CompleteDate" class="form-control" type="date" />
+                <span asp-validation-for="CompleteDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-sm-10 offset-sm-2">
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <a href="@Url.Action("Index", "CHTrack")" class="btn btn-secondary">İptal</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    <link href="~/lib/magicsuggest/magicsuggest.css" rel="stylesheet">
+
+}
+@section Scripts {
+    <script src="~/lib/magicsuggest/magicsuggest.js"></script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        function updateRSPUser() {
+            var department = document.getElementById("RSP_Department").value;
+
+            if (department) {
+                // Departman seçildiğinde kullanıcıları güncellemek için API çağrısı
+                $.ajax({
+                    url: '@Url.Action("GetUsersByDepartment", "Common")',
+                    type: 'POST',
+                    data: { department: department },
+                    success: function(response) {
+                        if (response.success) {
+                            var userSelect = $('#RSP_User');
+                            userSelect.empty(); // Var olan seçenekleri temizle
+                            userSelect.append('<option value="">Kişi Seçiniz...</option>');
+
+                            // Kullanıcıları dropdown'a ekle
+                            response.users.forEach(function(user) {
+                                userSelect.append('<option value="' + user.id + '">' + user.nameSurname + '</option>');
+                            });
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                });
+            } else {
+                // Eğer departman boşsa kullanıcıları temizle
+                $('#RSP_User').empty();
+                $('#RSP_User').append('<option value="">Kişi Seçiniz...</option>');
+            }
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Fetch the user list for MagicSuggest
+            $.ajax({
+                url: '/Common/GetUsers',
+                type: 'GET',
+                success: function (response) {
+                    // Ensure response structure is as expected
+                    if (response.success) {
+                        // Map the user data into MagicSuggest's expected format
+                        var userList = response.users.map(user => ({
+                            id: user.id,
+                            name: user.nameSurname
+                        }));
+                        var stringArray = @Html.Raw(Json.Serialize(ViewBag.SelectedVals));
+                        // Initialize MagicSuggest and store the instance in a variable
+                        var otherRSPs = $('#Other_RSPs_MG').magicSuggest({
+                            data: userList,          // User list as suggestions
+                            value:stringArray,  //
+                            valueField: 'id',        // Field used for value
+                            displayField: 'name',    // Field displayed in the dropdown
+                            placeholder: 'Diğer Sorumluları Seçin...',
+                            maxSelection: 5,         // Limit the number of selected items
+                            allowFreeEntries: false, // Disable manual entry
+                            highlight: true,         // Highlight matching suggestions
+                            selectionPosition: 'inner', // Position for selected items
+                            required: true           // Ensure the field is required
+                        });
+
+                        // Attach form submit event to update "Other_RSPs_MG" input value before form submission
+                        $('form').on('submit', function (event) {
+                            // Get selected user IDs and join them with commas
+                            var selectedValues = otherRSPs.getValue();
+
+                            // Log the selected values for debugging
+                            console.log("Selected Values before submit:", selectedValues);
+
+                            // Ensure there are multiple values, then join them with commas
+                            if (selectedValues.length > 0) {
+                                var selectedValuesString = selectedValues.join(', ');
+
+                                $('#Other_RSPs').val(selectedValuesString); // Set the value to input
+                            }
+                        });
+                    } else {
+                        alert(response.message || "Error fetching user list.");
+                    }
+                },
+                error: function () {
+                    alert("An error occurred while retrieving the user list.");
+                }
+            });
+        });
+    </script>
+}
