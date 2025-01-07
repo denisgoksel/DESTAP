@@ -41,7 +41,32 @@ namespace DESTAP.Helpers
                 return Json(new { success = false, message = "Internal Server Error: " + ex.Message });
             }
 
+        }
+        public async Task<JsonResult> GetUserList(string userIDs)
+        {
+            try
+            {
+                string[] IDs = userIDs.Split(',');
+                List<string> Users = new List<string>();
 
+                foreach (string item in IDs)
+                {
+                    var userEntity = await _context.TB_Users
+                                .Where(x => x.ID == Convert.ToInt32(item))
+                                .FirstOrDefaultAsync();
+
+                    string user = userEntity?.NameSurname ?? "Kullanıcı Bulunamadı";
+                    Users.Add(user);
+                }
+
+                return Json(new { success = true, users = Users });
+            }
+            catch (Exception ex)
+            {
+                // Konsola hata yazdırma
+                Console.WriteLine($"Error: {ex.Message}");
+                return Json(new { success = false, message = "Internal Server Error: " + ex.Message });
+            }
 
         }
         // Departmanı seçtiğimizde kullanıcıları getirecek bir action

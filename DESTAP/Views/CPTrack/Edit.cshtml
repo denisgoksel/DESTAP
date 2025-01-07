@@ -84,7 +84,7 @@
             <span asp-validation-for="RSP_User" class="text-danger"></span>
         </div>
     </div>
-    
+
     <div class="form-group row">
         <label class="col-sm-2 col-form-label">Diğer Sorumlu Kişiler</label>
         <div class="col-sm-10">
@@ -118,7 +118,7 @@
             <span asp-validation-for="CompleteDate" class="text-danger"></span>
         </div>
     </div>
-
+    <input type="hidden" name="FilePath" value="@Model.FilePath" />
     <div class="form-group row">
         <div class="col-sm-10 offset-sm-2">
             <button type="submit" class="btn btn-primary">Kaydet</button>

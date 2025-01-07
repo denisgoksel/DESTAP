@@ -37,7 +37,6 @@
                         <th>SORUMLU KİŞİ</th>
                         <th>DURUMU</th>
                         <th>HEDEF TARİH</th>
-
                         <th>TAMAMLANMA TARİHİ</th>
                         <th>AÇIKLAMA</th>
                         <th>İŞLEMLER</th>
@@ -60,13 +59,17 @@
                             </td>
                             <td class="clickable-cell">@item.RSP_Department</td>
 
-                            <td class="clickable-cell">@item.ResponsibleUser.NameSurname </td>
+                            <td class="clickable-cell">
+                            @item.ResponsibleUser.NameSurname 
+                            <input type="hidden" class="Class_RSPs" name="Other_RSPs" value="@item.Other_RSPs"/>
+                            </td>
                             <td class="clickable-cell">@item.State</td>
                             <td class="clickable-cell">@item.TargetDate?.ToString("dd.MM.yyyy HH:mm")</td>
 
                             <td id="completionDate_@item.ID" class="clickable-cell">@item.CompleteDate?.ToString("dd.MM.yyyy HH:mm")</td>
                             <td class="clickable-cell">
                                 <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">
+                                    <input type="hidden" class="FilePath" value="@item.FilePath" />
                                     @item.Description
                                 </div>
                             </td>
@@ -282,11 +285,15 @@
                         </tr>
                         <tr>
                             <td><strong>Sorumlu Departman</strong></td>
-                            <td id="recRSPDepartment"></td>
+                            <td id="recDepartment"></td>
                         </tr>
                         <tr>
                             <td><strong>Sorumlu Kişi</strong></td>
                             <td id="recResponsibleUser"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sorumlu Diğer Kişiler</strong></td>
+                            <td id="recOther_RSPs"></td>
                         </tr>
                         <tr>
                             <td><strong>Durum</strong></td>
@@ -303,6 +310,12 @@
                         <tr>
                             <td><strong>Açıklama</strong></td>
                             <td id="recDescription"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dosya Yolları</strong></td>
+                            <td>
+                                <ul id="recFilePathList"></ul>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -367,7 +380,7 @@
                 var recTargetDate = $(this).closest('tr').find('td:eq(10)').text(); // Hedef Tarih (11. sütun)
                 var recCompleteDate = $(this).closest('tr').find('td:eq(11)').text(); // Tamamlanma Tarihi (12. sütun)
                 var recDescription = $(this).closest('tr').find('td:eq(12)').text(); // Açıklama (13. sütun)
-
+                var recFilePath = $(this).closest('tr').find('.FilePath').val(); // filePath (16. sütun)
                 // Modal içindeki alanları güncelle
                 $('#recID').text(recID);
                 $('#recYear').text(recYear);
@@ -382,6 +395,50 @@
                 $('#recTargetDate').text(recTargetDate);
                 $('#recCompleteDate').text(recCompleteDate);
                 $('#recDescription').text(recDescription);
+                // Dosya yollarını listeye ekle
+                var filePathList = $('#recFilePathList');
+                filePathList.empty(); // Mevcut listeyi temizle
+
+                if (recFilePath) {
+                    var filePaths = recFilePath.split(',');
+                    filePaths.forEach(function (path) {
+                        filePathList.append('<li><a href="' + path + '" target="_blank">' + path + '</a></li>');
+                    });
+                } else {
+                    filePathList.append('<li>Dosya yolu bulunamadı</li>');
+                }
+                 
+
+                var userIDs = $(this).closest('tr').find('.Class_RSPs').val();
+       
+                $.ajax({
+                            url: '@Url.Action("GetUserList", "Common")',  // Controller ve action adı
+                            type: 'GET',  // veya 'POST' kullanılabilir
+                            data: { userIDs: userIDs },  // Parametre olarak userIDs'yi gönder
+                            success: function(response) {
+                                if (response.success) {
+                                    var userList = response.users;
+
+                                    // Kullanıcılar için bir <ul> oluştur
+                                    var userListHtml = '<ul>';
+                                    userList.forEach(function (user) {
+                                        userListHtml += '<li>' + user + '</li>';  // Kullanıcıyı <li> içinde ekle
+                                    });
+                                    userListHtml += '</ul>';
+
+                                    // recOther_RSPs hücresine listeyi ekle
+                                    $('#recOther_RSPs').html(userListHtml);
+                                } else {
+                                    alert('Error: ' + response.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                alert('An error occurred: ' + error);
+                            }
+                        });
+
+
+
 
                 // Modal'ı göster
                 $('#recDetailModal').modal('show');

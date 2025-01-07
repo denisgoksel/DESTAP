@@ -1,5 +1,6 @@
 ﻿using DESTAP.Helpers;
 using DESTAP.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -58,21 +59,32 @@ namespace DESTAP.Controllers
         // Handle form submission
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DVTrackModel changeTrack)
+        public async Task<IActionResult> Create(DVTrackModel DvTrack, List<IFormFile> fileUploads)
         {
             if (ModelState.IsValid)
             {
-                
-                _context.TB_DVTrack.Add(changeTrack);
+                // Save the record to the database first
+                _context.TB_DVTrack.Add(DvTrack);
                 await _context.SaveChangesAsync();
-                 
-                
-                await _commonsController.SendEmail(User.FindFirst(ClaimTypes.NameIdentifier).Value, _context.TB_DVTrack.MaxAsync(u => u.ID).Result, "TEST MAİLİ SAPMA KAYDI OLUŞTURULDU", "DVTrack");
+
+                // Save the files and update the FilePath property
+                var filePaths = await _commonsController.CreateFiles(DvTrack, fileUploads);
+                DvTrack.FilePath = string.Join(",", filePaths); // Concatenate file paths
+                _context.Update(DvTrack); // Update the model with file paths
+                await _context.SaveChangesAsync();
+
+                // Send email notification
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var maxId = await _context.TB_DVTrack.MaxAsync(u => u.ID);
+                await _commonsController.SendEmail(userId, maxId, "TEST MAIL DK KAYDI OLUŞTURULDU", "DVTrack");
+
                 return RedirectToAction("Index");
             }
-            return View(changeTrack);
+
+            return View(DvTrack);
         }
-        // GET: CHTrack/Edit/5
+
+        // GET: DVTrack/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
             var record = await _context.TB_DVTrack.FindAsync(id);

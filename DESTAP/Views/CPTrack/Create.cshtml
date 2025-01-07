@@ -109,7 +109,7 @@
                         </div>
 
                         <div class="form-row mb-3">
-                            <label asp-for="TargetDate" class="col-md-4 col-form-label text-md-right">HEDEF TARİH 1</label>
+                            <label asp-for="TargetDate" class="col-md-4 col-form-label text-md-right">HEDEF TARİH</label>
                             <div class="col-md-8">
                                 <input asp-for="TargetDate" class="form-control" type="date" min="@todayDate" />
                                 <span asp-validation-for="TargetDate" class="text-danger"></span>
@@ -127,7 +127,7 @@
                          -->
 
                         <div class="form-row mb-3">
-                            <label asp-for="Description" class="col-md-4 col-form-label text-md-right">TAMAMLANMA TARİHİ</label>
+                            <label asp-for="Description" class="col-md-4 col-form-label text-md-right">AÇIKLAMA</label>
                             <div class="col-md-8">
                                 <textarea asp-for="Description" class="form-control"></textarea>
                                 <span asp-validation-for="Description" class="text-danger"></span>

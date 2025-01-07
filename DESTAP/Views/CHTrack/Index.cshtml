@@ -42,84 +42,89 @@
                         <th>TAMAMLANMA TARİHİ</th>
                         <th>AÇIKLAMA</th>
                         <th>İŞLEMLER</th>
+                 
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr class="clickable-row" style="cursor: pointer;">
-                            <td class="clickable-cell">@item.ID</td>
-                            <td class="clickable-cell">@item.CreatedYear</td>
-                            <td class="clickable-cell">@item.ChangeNo</td>
-                            <td class="clickable-cell">@item.ChangeOpenDate?.ToString("dd.MM.yyyy")</td>
-                            <td class="clickable-cell">
-                                <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">@item.ChangeDescription</div>
-                            </td>
-                            <td class="clickable-cell">@item.ActionNo</td>
-                            <td class="clickable-cell">
-                                <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">@item.ActionDescription</div>
-                            </td>
-                            <td class="clickable-cell">@item.RSP_Department</td>
-                            <td class="clickable-cell">@item.ResponsibleUser.NameSurname</td>
-                            <td class="clickable-cell">@item.State</td>
-                            <td class="clickable-cell">@item.TargetDate1?.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="clickable-cell">@item.TargetDate2?.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="clickable-cell">@item.TargetDate3?.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="clickable-cell" id="completionDate_@item.ID">@item.CompleteDate?.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="clickable-cell">@item.Description</td>
-                            <td class="operations-column">
+                    <tr class="clickable-row" style="cursor: pointer;">
+                        <td class="clickable-cell">@item.ID</td>
+                        <td class="clickable-cell">@item.CreatedYear</td>
+                        <td class="clickable-cell">@item.ChangeNo</td>
+                        <td class="clickable-cell">@item.ChangeOpenDate?.ToString("dd.MM.yyyy")</td>
+                        <td class="clickable-cell">
+                            <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">@item.ChangeDescription</div>
+                        </td>
+                        <td class="clickable-cell">@item.ActionNo</td>
+                        <td class="clickable-cell">
+                            <div class="text-truncate" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">@item.ActionDescription</div>
+                        </td>
+                        <td class="clickable-cell">@item.RSP_Department</td>
+                        <td class="clickable-cell">@item.ResponsibleUser.NameSurname</td>
+                        <td class="clickable-cell">@item.State</td>
+                        <td class="clickable-cell">@item.TargetDate1?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="clickable-cell">@item.TargetDate2?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="clickable-cell">@item.TargetDate3?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="clickable-cell" id="completionDate_@item.ID">@item.CompleteDate?.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td class="clickable-cell">
+                            <input type="hidden" class="FilePath" value="@item.FilePath"/>
+                            @item.Description
+                        </td>
+                        <td class="operations-column">
 
-                                @if (User.Identity.IsAuthenticated)
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                @if (User.FindFirst(ClaimTypes.Role).Value == "1")//Admin?
                                 {
-                                    @if (User.FindFirst(ClaimTypes.Role).Value == "1")//Admin?
-                                    {
-                                        <div class="dropdown">
-                                            <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                İşlemler
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="actionMenuButton">
-                                                <a class="dropdown-item" href="@Url.Action("Edit", "CHTrack", new { id = item.ID })">Güncelle</a>
-                                                <a class="dropdown-item" href="#" onclick="confirmDelete('@item.ID', '@item.ChangeDescription')">Sil</a>
-                                                <a class="dropdown-item" href="#" onclick="sendEmail(@User.FindFirst(ClaimTypes.NameIdentifier).Value, @item.ID)">Mail At</a>
-                                                <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
-                                                <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
-                                                <a class="dropdown-item" href="#" onclick="showTargetDateModal(@item.ID)">Tarih Değişiklik Talebi</a>
-                                            </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            İşlemler
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="actionMenuButton">
+                                            <a class="dropdown-item" href="@Url.Action("Edit", "CHTrack", new { id = item.ID })">Güncelle</a>
+                                            <a class="dropdown-item" href="#" onclick="confirmDelete('@item.ID', '@item.ChangeDescription')">Sil</a>
+                                            <a class="dropdown-item" href="#" onclick="sendEmail(@User.FindFirst(ClaimTypes.NameIdentifier).Value, @item.ID)">Mail At</a>
+                                            <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
+                                            <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
+                                            <a class="dropdown-item" href="#" onclick="showTargetDateModal(@item.ID)">Tarih Değişiklik Talebi</a>
                                         </div>
+                                    </div>
 
 
-                                    }
-                                    else if (User.FindFirst(ClaimTypes.Role).Value == "2")//User?
-                                    {
-                                        <div class="dropdown">
-                                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                İşlemler
-                                            </button>
-                                            <div class="dropdown-menu" aria-labelledby="actionMenuButton">
-                                                @if (loggedInUserId == item.RSP_User.ToString())
-                                                {
-                                                    <div class="row custom-button-row">
-                                                        @if (item.CompleteDate == null || item.CompleteDate.ToString() == "")  // CompleteDate alanı boşsa göster
-                                                        {
-
-                                                            <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
-
-                                                        }
-
-                                                        <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
-                                                        <a class="dropdown-item" href="#" onclick="showTargetDateModal('@item.ID')">Tarih Değişiklik Talebi</a>
-                                                    </div>
-                                                }
-                                                else
-                                                {
-                                                    <a class="dropdown-item" href="#">Bu Kayıtta Yetkiniz Yok!</a>
-                                                }
-                                            </div>
-                                        </div>
-                                    }
                                 }
-                            </td>
-                        </tr>
+                                else if (User.FindFirst(ClaimTypes.Role).Value == "2")//User?
+                                {
+                                    <div class="dropdown">
+                                        <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="actionMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            İşlemler
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="actionMenuButton">
+                                            @if (loggedInUserId == item.RSP_User.ToString())
+                                            {
+                                                <div class="row custom-button-row">
+                                                    @if (item.CompleteDate == null || item.CompleteDate.ToString() == "")  // CompleteDate alanı boşsa göster
+                                                    {
+
+                                                        <a class="dropdown-item" href="#" onclick="showCompletionModal('@item.ID')">Tamamla</a>
+
+                                                    }
+
+                                                    <a class="dropdown-item" href="#" onclick="sendFeedBack('@User.FindFirst(ClaimTypes.NameIdentifier).Value', '@item.ID')">Geri Bildirim</a>
+                                                    <a class="dropdown-item" href="#" onclick="showTargetDateModal('@item.ID')">Tarih Değişiklik Talebi</a>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <a class="dropdown-item" href="#">Bu Kayıtta Yetkiniz Yok!</a>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </td>
+                       
+                    </tr>
                     }
                 </tbody>
             </table>
@@ -168,7 +173,7 @@
                             <td id="recActionDescription"></td>
                         </tr>
                         <tr>
-                            <td><strong>Departman</strong></td>
+                            <td><strong>Sorumlu Departman</strong></td>
                             <td id="recDepartment"></td>
                         </tr>
                         <tr>
@@ -198,6 +203,12 @@
                         <tr>
                             <td><strong>Açıklama</strong></td>
                             <td id="recDescription"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dosya Yolları</strong></td>
+                            <td>
+                                <ul id="recFilePathList"></ul>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -334,6 +345,9 @@
 
     <script>
         $(document).ready(function () {
+            $('#example').DataTable({
+                
+            });
             $('#dataTable1').DataTable({
                 "language": {
                     "url": "/lib/datatables/Turkish.json" // Türkçe dil dosyasını ekleyin
@@ -346,6 +360,7 @@
                 "pageLength": 10,            // Sayfa başına 10 kayıt
                 "lengthChange": false,       // Kullanıcıların sayfa başına gösterilen kayıt sayısını değiştirmesini engelle
                 "order": [[0, 'desc']]       // ID sütunu (ilk sütun) büyükten küçüğe sıralanacak
+                 
             });
         });
     </script>
@@ -375,7 +390,8 @@
                 var recTargetDate3 = $(this).closest('tr').find('td:eq(12)').text(); // Hedef Tarih 3 (13. sütun)
                 var recCompleteDate = $(this).closest('tr').find('td:eq(13)').text(); // Tamamlanma Tarihi (14. sütun)
                 var recDescription = $(this).closest('tr').find('td:eq(14)').text(); // Açıklama (15. sütun)
-
+                var recFilePath = $(this).closest('tr').find('.FilePath').val(); // filePath (16. sütun)
+              
                 // Modal içindeki alanları güncelle
                 $('#recID').text(recID);
                 $('#recYear').text(recYear);
@@ -392,7 +408,18 @@
                 $('#recTargetDate3').text(recTargetDate3);
                 $('#recCompleteDate').text(recCompleteDate);
                 $('#recDescription').text(recDescription);
+                // Dosya yollarını listeye ekle
+                var filePathList = $('#recFilePathList');
+                filePathList.empty(); // Mevcut listeyi temizle
 
+                if (recFilePath) {
+                    var filePaths = recFilePath.split(',');
+                    filePaths.forEach(function (path) {
+                        filePathList.append('<li><a href="' + path + '" target="_blank">' + path + '</a></li>');
+                    });
+                } else {
+                    filePathList.append('<li>Dosya yolu bulunamadı</li>');
+                }
                 // Modal'ı göster
                 $('#recDetailModal').modal('show');
             });

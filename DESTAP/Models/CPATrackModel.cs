@@ -15,11 +15,9 @@ namespace DESTAP.Models
         public int? UserID { get; set; }
         [ForeignKey("UserID")]
         public virtual UserModel User { get; set; } // UserID ile ilişkilendirilmiş kullanıcı
-
-        [MaxLength(10)]
+ 
         public string CreatedYear { get; set; }
-
-        [MaxLength(50)]
+ 
         public string CPANo { get; set; }
 
         public DateTime? CPAOpenDate { get; set; }
@@ -44,7 +42,7 @@ namespace DESTAP.Models
             set => _otherRSPs = value;  // null değer gelebilir, onu _otherRSPs olarak ayarlıyoruz
         }*/
         public string? Other_RSPs { get; set; }
-        [MaxLength(50)]
+         
         public string State { get; set; }
 
         public DateTime? TargetDate { get; set; }
