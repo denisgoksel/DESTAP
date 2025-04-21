@@ -30,6 +30,7 @@ namespace DESTAP.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(UserModel f_user)
         {
+            //güncellleme denetleme inciecza
             // Kullanıcıyı veritabanında kontrol etme
             var user = _context.TB_Users.FirstOrDefault(u => u.Password == f_user.Password);
 
